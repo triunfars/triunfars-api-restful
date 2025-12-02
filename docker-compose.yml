@@ -25,7 +25,7 @@ services:
       - nest-network
 
   mongo:
-    image: mongo:latest
+    image: mongo:7.0
     command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
     ports:
       - "27017:27017"
@@ -33,6 +33,10 @@ services:
       - mongo-data:/data/db
     networks:
       - nest-network
+    healthcheck:
+      test: test $$(echo "rs.initiate({_id:'rs0',members:[{_id:0,host:'mongo:27017'}]}).ok || rs.status().ok" | mongosh --port 27017 --quiet) -eq 1
+      interval: 10s
+      start_period: 30s
 
   mongo-express:
     image: mongo-express

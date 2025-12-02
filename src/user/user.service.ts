@@ -1,11 +1,11 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateUserDto } from './dto';
 import { User } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async getAllUsers() {
     return this.prisma.user.findMany();
@@ -27,17 +27,14 @@ export class UsersService {
   }
 
   async getMe(user: User) {
-    try {
-      const me = await this.prisma.user.findUnique({
-        where: { id: user.id },
-        include: { instance: true },
-      });
-      if (!me) throw new ForbiddenException('Error while finding user');
-      return me;
-    } catch (error) {
-      console.log('GET_ME_ERROR ==>>', error);
-      throw new ForbiddenException('Internal error');
+    const me = await this.prisma.user.findUnique({
+      where: { id: user.id },
+      include: { instance: true },
+    });
+    if (!me) {
+      throw new NotFoundException(`User with ID ${user.id} not found`);
     }
+    return me;
   }
 
   async editMe(user: User) {
@@ -66,36 +63,30 @@ export class UsersService {
   // TODO: check we don't update the user current logged in
   async updateUser(dto: UpdateUserDto, id: string) {
     try {
-      const userUpdated = this.prisma.user.update({
-        where: {
-          id,
-        },
+      const userUpdated = await this.prisma.user.update({
+        where: { id },
         data: { ...dto },
       });
-
-      if (!userUpdated)
-        throw new ForbiddenException('Unexpected error, user not updated');
-
       return userUpdated;
     } catch (error) {
-      console.log('UPDATE_USER ==>>', error);
-      throw new ForbiddenException('Internal error');
+      if (error?.code === 'P2025' || error?.meta?.cause?.includes('Record to update not found')) {
+        throw new NotFoundException(`User with ID ${id} not found`);
+      }
+      throw error;
     }
   }
 
   async deleteUser(userId: string) {
     try {
-      const user = this.prisma.user.delete({
+      const user = await this.prisma.user.delete({
         where: { id: userId },
       });
-
-      if (!user)
-        throw new ForbiddenException('Unexpected error, user not deleted');
-
       return user;
     } catch (error) {
-      console.log('DELETE_USER ==>>', error);
-      throw new ForbiddenException('Internal error');
+      if (error?.code === 'P2025' || error?.meta?.cause?.includes('Record to delete does not exist')) {
+        throw new NotFoundException(`User with ID ${userId} not found`);
+      }
+      throw error;
     }
   }
 }

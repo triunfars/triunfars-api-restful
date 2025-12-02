@@ -19,7 +19,7 @@ import { hasRoles } from 'src/auth/decorators/roles.decorators';
 @UseGuards(JwtGuard)
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService) { }
 
   @Get('/me/privileges')
   getMyPrivileges(@GetMe() user: User) {
@@ -52,7 +52,7 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @hasRoles(Role.ADMIN)
   @Delete('/:id')
-  deleteUser(@Param('id') id: string) {
-    this.usersService.deleteUser(id);
+  async deleteUser(@Param('id') id: string) {
+    return this.usersService.deleteUser(id);
   }
 }

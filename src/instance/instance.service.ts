@@ -9,25 +9,31 @@ export class InstancesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly s3Service: S3Service,
-  ) {}
+  ) { }
 
   getInstances() {
-    return this.prisma.instance.findMany({
-      include: {
-        users: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
+    try {
+      return this.prisma.instance.findMany({
+        include: {
+          users: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+          courses: {
+            select: {
+              title: true,
+            },
           },
         },
-        courses: {
-          select: {
-            title: true,
-          },
-        },
-      },
-    });
+      });
+    } catch (error) {
+      console.log('GET_INSTANCES ==>>', error);
+      throw error;
+    }
+
   }
 
   async getInstanceBySlug(slug: string) {

@@ -18,10 +18,6 @@ export class SignUpDto {
   @IsNotEmpty()
   lastName: string;
 
-  @IsString()
-  @IsNotEmpty()
-  instanceId: string;
-
   @IsEnum(Role)
   @IsNotEmpty()
   role: Role;
@@ -35,8 +31,4 @@ export class SignInDto {
   @IsString()
   @IsNotEmpty()
   password: string;
-
-  @IsString()
-  @IsNotEmpty()
-  instanceId: string;
 }

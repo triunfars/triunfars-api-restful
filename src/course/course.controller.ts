@@ -22,11 +22,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 @UseGuards(JwtGuard)
 @Controller()
 export class CourseController {
-  constructor(private readonly courseService: CourseService) {}
+  constructor(private readonly courseService: CourseService) { }
 
   @Get()
-  getAll(@Query() query) {
-    return this.courseService.getAll(query.instanceId);
+  getAll() {
+    return this.courseService.getAll();
   }
 
   @Get(':slug')

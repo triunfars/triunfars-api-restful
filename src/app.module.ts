@@ -5,7 +5,6 @@ import { RouterModule } from '@nestjs/core';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './user/user.module';
-import { InstancesModule } from './instance/instance.module';
 import { CategoryModule } from './category/category.module';
 import { CourseModule } from './course/course.module';
 import { LessonModule } from './course/section/lesson/lesson.module';
@@ -22,7 +21,6 @@ import { S3Module } from './s3/s3.module';
     AuthModule,
     UsersModule,
     S3Module,
-    InstancesModule,
     CategoryModule,
     CourseModule,
     SectionModule,
@@ -52,4 +50,4 @@ import { S3Module } from './s3/s3.module';
     ]),
   ],
 })
-export class AppModule {}
+export class AppModule { }

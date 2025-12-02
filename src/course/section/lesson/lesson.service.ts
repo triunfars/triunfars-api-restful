@@ -9,7 +9,7 @@ export class LessonService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly s3Service: S3Service,
-  ) {}
+  ) { }
 
   // chequear la forma de tambien chequear el curso si existe sin tener que pasar el courseId por todos lados
   private async checkSection(sectionSlug: string) {
@@ -89,12 +89,9 @@ export class LessonService {
     try {
       const section = await this.checkSection(sectionSlug);
       const slug = slugify(dto.title);
-      const newLesson = await this.prisma.lesson.create({
+      return await this.prisma.lesson.create({
         data: { ...dto, sectionId: section.id, slug },
       });
-      if (!newLesson)
-        throw new ForbiddenException('Unexpected error, lesson not created');
-      return newLesson;
     } catch (error) {
       console.log('CREATE_LESSON_ERROR ==>>', error);
       throw new ForbiddenException('Server internal error');
@@ -109,15 +106,10 @@ export class LessonService {
     try {
       const section = await this.checkSection(sectionSlug);
       const slug = slugify(dto.title);
-      const updatedLesson = await this.prisma.lesson.update({
+      return await this.prisma.lesson.update({
         where: { id: lessonId, sectionId: section.id },
         data: { ...dto, slug },
       });
-
-      if (!updatedLesson)
-        throw new ForbiddenException('Unexpected error, lesson not updated');
-
-      return updatedLesson;
     } catch (error) {
       console.log('UPDATE_LESSON_ERROR ==>>', error);
       throw new ForbiddenException('Server internal error');
@@ -135,21 +127,41 @@ export class LessonService {
       // Constructing key and saving image in AWS
       const key = `${file.fieldname}${Date.now()}`;
       const imageUrl = await this.s3Service.uploadFile(file, key);
-      const lessonUpdated = await this.prisma.lesson.update({
+      return await this.prisma.lesson.update({
         where: {
           id: lessonId,
           sectionId: section.id,
         },
         data: { coverImage: imageUrl },
       });
-
-      if (!lessonUpdated) {
-        throw new ForbiddenException('Lesson not updated, please check logs');
-      }
-
-      return lessonUpdated;
     } catch (error) {
       console.log('ADD_LESSON_IMAGE_ERROR ==>>', error);
+      throw new ForbiddenException('Server internal error');
+    }
+  }
+
+  async markLessonAsCompleted(lessonId: string, userId: string) {
+    try {
+      const lessonProgress = await this.prisma.lessonProgress.upsert({
+        where: {
+          userId_lessonId: {
+            userId: userId,
+            lessonId: lessonId,
+          },
+        },
+        update: {
+          isCompleted: true,
+        },
+        create: {
+          userId: userId,
+          lessonId: lessonId,
+          isCompleted: true,
+        },
+      });
+
+      return lessonProgress;
+    } catch (error) {
+      console.log('MARK_LESSON_AS_COMPLETED_ERROR ==>>', error);
       throw new ForbiddenException('Server internal error');
     }
   }
@@ -161,8 +173,6 @@ export class LessonService {
       const deletedLesson = await this.prisma.lesson.delete({
         where: { id: lessonId, sectionId },
       });
-      if (!deletedLesson)
-        throw new ForbiddenException('Unexpected error, lesson not deleted');
 
       return {
         success: true,

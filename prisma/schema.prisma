@@ -37,6 +37,23 @@ model Lesson {
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  lessonProgress LessonProgress[]
+}
+
+model LessonProgress {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  lessonId  String   @db.ObjectId
+  isCompleted Boolean @default(false)
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, lessonId])
 }
 
 model Category {
@@ -104,11 +121,12 @@ model User {
   bio String?
   avatar String?
 
-  instanceId String @db.ObjectId
-  instance Instance @relation(fields: [instanceId], references: [id])
+  instanceId String? @db.ObjectId
+  instance Instance? @relation(fields: [instanceId], references: [id])
 
   courses Course[]
   reviews Review[]
+  lessonProgress LessonProgress[]
 
   // resetPasswordToken String
   // resetPasswordExpire DateTime
@@ -132,8 +150,8 @@ model Course {
   categoryId String @db.ObjectId
   category Category @relation(fields: [categoryId], references: [id])
 
-  instanceId String @db.ObjectId
-  instance Instance @relation(fields: [instanceId], references: [id])
+  instanceId String? @db.ObjectId
+  instance Instance? @relation(fields: [instanceId], references: [id])
 
   sections Section[]
   reviews Review[]

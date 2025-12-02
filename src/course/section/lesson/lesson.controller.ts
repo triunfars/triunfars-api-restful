@@ -14,11 +14,13 @@ import { LessonService } from './lesson.service';
 import { JwtGuard } from 'src/auth/guard';
 import { CreateLessonDto } from './dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { GetMe } from 'src/auth/decorators/get-me.decorator';
+import { User } from '@prisma/client';
 
-UseGuards(JwtGuard);
+@UseGuards(JwtGuard)
 @Controller()
 export class LessonController {
-  constructor(private readonly lessonService: LessonService) {}
+  constructor(private readonly lessonService: LessonService) { }
 
   @Get()
   getAll(@Param('sectionSlug') sectionSlug: string) {
@@ -58,6 +60,14 @@ export class LessonController {
     @Param('lessonId') lessonId: string,
   ) {
     return this.lessonService.addLessonImage(file, lessonId, sectionSlug);
+  }
+
+  @Patch(':lessonId/complete')
+  markAsCompleted(
+    @Param('lessonId') lessonId: string,
+    @GetMe() user: User,
+  ) {
+    return this.lessonService.markLessonAsCompleted(lessonId, user.id);
   }
 
   @Delete(':lessonId')

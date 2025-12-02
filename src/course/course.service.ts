@@ -9,16 +9,13 @@ export class CourseService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly s3Service: S3Service,
-  ) {}
+  ) { }
 
-  async getAll(instanceId: string) {
+  async getAll() {
     try {
-      if (!instanceId) throw new ForbiddenException('Instance Id is required');
       return await this.prisma.course.findMany({
-        where: { instanceId },
         include: {
           category: true,
-          instance: true,
           instructor: true,
           sections: {
             select: {
@@ -54,7 +51,6 @@ export class CourseService {
         where: { slug },
         include: {
           category: true,
-          instance: true,
           instructor: true,
           sections: {
             select: {
@@ -90,13 +86,6 @@ export class CourseService {
 
   async createCourse(dto: CreateCourseDto) {
     try {
-      // Find the instance to check if exists
-      const instance = await this.prisma.instance.findUnique({
-        where: { id: dto.instanceId },
-      });
-
-      if (!instance) throw new ForbiddenException('Instance does not exists');
-
       // Check the category and check if exists
       const category = await this.prisma.category.findUnique({
         where: { id: dto.categoryId },

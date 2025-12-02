@@ -2,6 +2,29 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
 
+# Triunfars API
+
+## Docker Setup
+
+To run the application with Docker Compose (App + MongoDB + Mongo Express):
+
+1.  Ensure you have Docker and Docker Compose installed.
+2.  Create a `.env` file (if you haven't already):
+    ```bash
+    cp .env.template .env
+    ```
+3.  Start the services:
+    ```bash
+    docker-compose up -d
+    ```
+
+-   **API**: [http://localhost:3000](http://localhost:3000)
+-   **Mongo Express**: [http://localhost:8081](http://localhost:8081)
+-   **MongoDB**: `localhost:27017`
+
+## Local Setup
+
+
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 

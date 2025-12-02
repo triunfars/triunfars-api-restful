@@ -11,9 +11,6 @@ export class CreateCourseDto {
   instructorId: string;
 
   @IsString()
-  instanceId: string;
-
-  @IsString()
   categoryId: string;
 
   @IsString()
@@ -24,7 +21,6 @@ export interface UpdateCourseDto {
   title: string;
   description: string;
   instructorId: string;
-  instanceId: string;
   categoryId: string;
   price: string;
 }

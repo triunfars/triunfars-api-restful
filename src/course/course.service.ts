@@ -94,7 +94,7 @@ export class CourseService {
       if (!category) throw new ForbiddenException('Category does not exists');
 
       // Create course
-      const slug = slugify(dto.title);
+      const slug = slugify(dto.title, { lower: true });
       const newCourse = await this.prisma.course.create({
         data: {
           ...dto,
@@ -118,7 +118,7 @@ export class CourseService {
 
   async updateCourse(dto: UpdateCourseDto, id: string) {
     try {
-      const slug = slugify(dto.title);
+      const slug = slugify(dto.title, { lower: true });
       const updatedCourse = await this.prisma.course.update({
         where: { id },
         data: { ...dto, slug },
@@ -238,6 +238,26 @@ export class CourseService {
         include: {
           category: true,
           instructor: true,
+          sections: {
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              coverImage: true,
+              lessons: {
+                select: {
+                  id: true,
+                  title: true,
+                  type: true,
+                  description: true,
+                  content: true,
+                  url: true,
+                  coverImage: true,
+                  slug: true,
+                },
+              },
+            },
+          },
         },
       });
     } catch (error) {

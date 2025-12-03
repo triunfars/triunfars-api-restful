@@ -63,7 +63,7 @@ export class SectionService {
     try {
       const course = await this.checkCourse(courseSlug);
 
-      const sectionSlug = slugify(dto.title);
+      const sectionSlug = slugify(dto.title, { lower: true });
       const newSection = await this.prisma.section.create({
         data: {
           ...dto,
@@ -115,7 +115,7 @@ export class SectionService {
   ) {
     try {
       const course = await this.checkCourse(courseSlug);
-      const slug = slugify(dto.title);
+      const slug = slugify(dto.title, { lower: true });
       const updatedSection = await this.prisma.section.update({
         where: {
           courseId: course.id,

@@ -15,6 +15,7 @@ import { CourseService } from './course.service';
 import { JwtGuard } from 'src/auth/guard';
 import { CreateCourseDto, UpdateCourseDto } from './dto';
 import { hasRoles } from 'src/auth/decorators/roles.decorators';
+import { GetMe } from 'src/auth/decorators/get-me.decorator';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { Role } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -62,5 +63,20 @@ export class CourseController {
   @Delete(':id')
   deleteCourse(@Param('id') id: string) {
     return this.courseService.deleteCourse(id);
+  }
+
+  @Post(':id/enroll')
+  enrollUser(@Param('id') courseId: string, @GetMe('id') userId: string) {
+    return this.courseService.enrollUser(courseId, userId);
+  }
+
+  @Delete(':id/enroll')
+  unenrollUser(@Param('id') courseId: string, @GetMe('id') userId: string) {
+    return this.courseService.unenrollUser(courseId, userId);
+  }
+
+  @Get('user/enrolled')
+  getEnrolledCourses(@GetMe('id') userId: string) {
+    return this.courseService.getEnrolledCourses(userId);
   }
 }

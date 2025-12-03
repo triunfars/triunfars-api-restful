@@ -50,6 +50,21 @@ async function main() {
     });
     console.log({ instructor });
 
+    const student = await prisma.user.upsert({
+        where: { email: 'student@example.com' },
+        update: {},
+        create: {
+            email: 'student@example.com',
+            password,
+            firstName: 'Jane',
+            lastName: 'Smith',
+            role: Role.STUDENT,
+            isEmailConfirmed: true,
+            bio: 'Eager student learning NestJS.',
+        },
+    });
+    console.log({ student });
+
     // 3. Create Category
     const category = await prisma.category.upsert({
         where: { slug: 'web-development' },
@@ -78,6 +93,21 @@ async function main() {
         },
     });
     console.log({ course });
+
+    // Enroll users
+    await prisma.course.update({
+        where: { id: course.id },
+        data: {
+            students: {
+                connect: [
+                    { id: admin.id },
+                    { id: instructor.id },
+                    { id: student.id },
+                ],
+            },
+        },
+    });
+    console.log('Enrolled users in course');
 
     // 5. Create Sections and Lessons
     const videoUrl = 'https://triunfars-bucket.s3.us-east-2.amazonaws.com/video1.mp4';

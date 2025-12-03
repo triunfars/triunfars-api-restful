@@ -124,7 +124,9 @@ model User {
   instanceId String? @db.ObjectId
   instance Instance? @relation(fields: [instanceId], references: [id])
 
-  courses Course[]
+  coursesAsInstructor Course[] @relation("InstructorCourses")
+  enrolledCourses Course[] @relation("UserEnrollments", fields: [enrolledCourseIds], references: [id])
+  enrolledCourseIds String[] @db.ObjectId
   reviews Review[]
   lessonProgress LessonProgress[]
 
@@ -145,7 +147,10 @@ model Course {
   
 
   instructorId String @db.ObjectId 
-  instructor User @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  instructor User @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
+
+  students User[] @relation("UserEnrollments", fields: [studentIds], references: [id])
+  studentIds String[] @db.ObjectId
 
   categoryId String @db.ObjectId
   category Category @relation(fields: [categoryId], references: [id])

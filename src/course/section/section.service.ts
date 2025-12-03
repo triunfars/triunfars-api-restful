@@ -9,12 +9,13 @@ export class SectionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly s3Service: S3Service,
-  ) {}
+  ) { }
 
   private async checkCourse(slug: string) {
     try {
       const course = await this.prisma.course.findUnique({
         where: { slug },
+        select: { id: true },
       });
       if (!course) throw new ForbiddenException('Course does not exist');
 

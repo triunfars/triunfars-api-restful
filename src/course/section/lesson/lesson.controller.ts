@@ -23,24 +23,29 @@ export class LessonController {
   constructor(private readonly lessonService: LessonService) { }
 
   @Get()
-  getAll(@Param('sectionSlug') sectionSlug: string) {
-    return this.lessonService.getAll(sectionSlug);
+  getAll(
+    @Param('sectionSlug') sectionSlug: string,
+    @Param('courseSlug') courseSlug: string,
+  ) {
+    return this.lessonService.getAll(sectionSlug, courseSlug);
   }
 
   @Get(':lessonId')
   getById(
     @Param('lessonId') lessonId: string,
     @Param('sectionSlug') sectionSlug: string,
+    @Param('courseSlug') courseSlug: string,
   ) {
-    return this.lessonService.getById(sectionSlug, lessonId);
+    return this.lessonService.getById(sectionSlug, lessonId, courseSlug);
   }
 
   @Post()
   createLesson(
     @Body() dto: CreateLessonDto,
     @Param('sectionSlug') sectionSlug: string,
+    @Param('courseSlug') courseSlug: string,
   ) {
-    return this.lessonService.createLesson(sectionSlug, dto);
+    return this.lessonService.createLesson(sectionSlug, dto, courseSlug);
   }
 
   @Patch(':lessonId')
@@ -48,8 +53,9 @@ export class LessonController {
     @Body() dto: Partial<CreateLessonDto>,
     @Param('lessonId') lessonId: string,
     @Param('sectionSlug') sectionSlug: string,
+    @Param('courseSlug') courseSlug: string,
   ) {
-    return this.lessonService.updateLesson(dto, lessonId, sectionSlug);
+    return this.lessonService.updateLesson(dto, lessonId, sectionSlug, courseSlug);
   }
 
   @Patch(':lessonId/uploadimage')
@@ -58,8 +64,9 @@ export class LessonController {
     @UploadedFile() file: Express.Multer.File,
     @Param('sectionSlug') sectionSlug: string,
     @Param('lessonId') lessonId: string,
+    @Param('courseSlug') courseSlug: string,
   ) {
-    return this.lessonService.addLessonImage(file, lessonId, sectionSlug);
+    return this.lessonService.addLessonImage(file, lessonId, sectionSlug, courseSlug);
   }
 
   @Patch(':lessonId/complete')
@@ -74,7 +81,8 @@ export class LessonController {
   deleteLesson(
     @Param('lessonId') lessonId: string,
     @Param('sectionSlug') sectionSlug: string,
+    @Param('courseSlug') courseSlug: string,
   ) {
-    return this.lessonService.deleteLesson(lessonId, sectionSlug);
+    return this.lessonService.deleteLesson(lessonId, sectionSlug, courseSlug);
   }
 }

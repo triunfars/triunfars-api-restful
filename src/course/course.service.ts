@@ -170,4 +170,81 @@ export class CourseService {
       throw new ForbiddenException('Server Internal Error');
     }
   }
+
+  async enrollUser(courseId: string, userId: string) {
+    try {
+      const course = await this.prisma.course.update({
+        where: { id: courseId },
+        data: {
+          students: {
+            connect: { id: userId },
+          },
+        },
+      });
+      return course;
+    } catch (error) {
+      console.log('ENROLL_USER ==>>', error);
+      if (error.code === 'P2025') {
+        throw new ForbiddenException('Course not found');
+      }
+      throw new ForbiddenException('Server Internal Error');
+    }
+  }
+
+  async unenrollUser(courseId: string, userId: string) {
+    try {
+      const course = await this.prisma.course.update({
+        where: { id: courseId },
+        data: {
+          students: {
+            disconnect: { id: userId },
+          },
+        },
+      });
+      return course;
+    } catch (error) {
+      console.log('UNENROLL_USER ==>>', error);
+      if (error.code === 'P2025') {
+        throw new ForbiddenException('Course not found');
+      }
+      throw new ForbiddenException('Server Internal Error');
+    }
+  }
+
+  async getEnrolledCourses(userId: string) {
+    try {
+      return await this.prisma.course.findMany({
+        where: {
+          studentIds: {
+            has: userId,
+          },
+        },
+        include: {
+          category: true,
+          instructor: true,
+        },
+      });
+    } catch (error) {
+      console.log('GET_ENROLLED_COURSES ==>>', error);
+      throw new ForbiddenException('Server Internal Error');
+    }
+  }
+
+  async getEnrolledUsers(courseId: string) {
+    try {
+      const course = await this.prisma.course.findUnique({
+        where: { id: courseId },
+        include: {
+          students: true,
+        },
+      });
+
+      if (!course) throw new ForbiddenException('Course not found');
+
+      return course.students;
+    } catch (error) {
+      console.log('GET_ENROLLED_USERS ==>>', error);
+      throw new ForbiddenException('Server Internal Error');
+    }
+  }
 }

@@ -12,31 +12,31 @@ export class LessonService {
   ) { }
 
   // chequear la forma de tambien chequear el curso si existe sin tener que pasar el courseId por todos lados
-  private async checkSection(sectionSlug: string) {
+  // chequear la forma de tambien chequear el curso si existe sin tener que pasar el courseId por todos lados
+  private async checkSection(sectionSlug: string, courseSlug?: string) {
     try {
-      // const course =
-      //   await this.prisma.course.findUnique({
-      //     where: { id: courseId },
-      //   });
+      const where: any = { slug: sectionSlug };
 
-      // if (!course)
-      //   throw new ForbiddenException(
-      //     'Course does not exist',
-      //   );
+      if (courseSlug) {
+        where.course = { slug: courseSlug };
+      }
+
       const section = await this.prisma.section.findUnique({
-        where: { slug: sectionSlug },
+        where,
+        select: { id: true },
       });
 
-      if (!section) throw new ForbiddenException('Section does not exist');
+      if (!section) throw new ForbiddenException('Section does not exist or does not belong to course');
       return section;
     } catch (error) {
       console.log('CHECK_SECTION_ERROR ==>>', error);
+      if (error instanceof ForbiddenException) throw error;
       throw new ForbiddenException('Server internal error');
     }
   }
 
-  async getAll(sectionSlug: string) {
-    const section = await this.checkSection(sectionSlug);
+  async getAll(sectionSlug: string, courseSlug?: string) {
+    const section = await this.checkSection(sectionSlug, courseSlug);
     return this.prisma.lesson.findMany({
       where: { sectionId: section.id },
       include: {
@@ -54,9 +54,9 @@ export class LessonService {
     });
   }
 
-  async getById(sectionSlug: string, lessonId: string) {
+  async getById(sectionSlug: string, lessonId: string, courseSlug?: string) {
     try {
-      const section = await this.checkSection(sectionSlug);
+      const section = await this.checkSection(sectionSlug, courseSlug);
       const lesson = await this.prisma.lesson.findUnique({
         where: {
           sectionId: section.id,
@@ -85,9 +85,9 @@ export class LessonService {
     }
   }
 
-  async createLesson(sectionSlug: string, dto: CreateLessonDto) {
+  async createLesson(sectionSlug: string, dto: CreateLessonDto, courseSlug?: string) {
     try {
-      const section = await this.checkSection(sectionSlug);
+      const section = await this.checkSection(sectionSlug, courseSlug);
       const slug = slugify(dto.title);
       return await this.prisma.lesson.create({
         data: { ...dto, sectionId: section.id, slug },
@@ -102,9 +102,10 @@ export class LessonService {
     dto: Partial<CreateLessonDto>,
     lessonId: string,
     sectionSlug: string,
+    courseSlug?: string,
   ) {
     try {
-      const section = await this.checkSection(sectionSlug);
+      const section = await this.checkSection(sectionSlug, courseSlug);
       const slug = slugify(dto.title);
       return await this.prisma.lesson.update({
         where: { id: lessonId, sectionId: section.id },
@@ -120,9 +121,10 @@ export class LessonService {
     file: Express.Multer.File,
     lessonId: string,
     sectionSlug: string,
+    courseSlug?: string,
   ) {
     try {
-      const section = await this.checkSection(sectionSlug);
+      const section = await this.checkSection(sectionSlug, courseSlug);
 
       // Constructing key and saving image in AWS
       const key = `${file.fieldname}${Date.now()}`;
@@ -166,12 +168,12 @@ export class LessonService {
     }
   }
 
-  async deleteLesson(lessonId: string, sectionId: string) {
+  async deleteLesson(lessonId: string, sectionSlug: string, courseSlug?: string) {
     try {
-      await this.checkSection(sectionId);
+      const section = await this.checkSection(sectionSlug, courseSlug);
 
       const deletedLesson = await this.prisma.lesson.delete({
-        where: { id: lessonId, sectionId },
+        where: { id: lessonId, sectionId: section.id },
       });
 
       return {

@@ -11,6 +11,10 @@ export const envValidationSchema = Joi.object({
     AWS_ACCESS_KEY_ID: Joi.string().required().description('AWS Access Key ID'),
     AWS_SECRET_ACCESS_KEY: Joi.string().required().description('AWS Secret Access Key'),
 
+    // RevenueCat Configuration
+    REVENUECAT_WEBHOOK_SECRET: Joi.string().required().description('Secret for validating RevenueCat webhooks'),
+    REVENUECAT_API_KEY: Joi.string().optional().description('API Key for RevenueCat API'),
+
     // Optional: Node Environment
     NODE_ENV: Joi.string()
         .valid('development', 'production', 'test', 'provision')

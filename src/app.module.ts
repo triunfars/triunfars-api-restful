@@ -14,6 +14,7 @@ import { LessonModule } from './course/section/lesson/lesson.module';
 import { SectionModule } from './course/section/section.module';
 import { ReviewModule } from './course/review/review.module';
 import { S3Module } from './s3/s3.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { S3Module } from './s3/s3.module';
     SectionModule,
     LessonModule,
     ReviewModule,
+    PaymentModule,
     RouterModule.register([
       {
         path: '/courses',

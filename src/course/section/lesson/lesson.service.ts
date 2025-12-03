@@ -11,8 +11,6 @@ export class LessonService {
     private readonly s3Service: S3Service,
   ) { }
 
-  // chequear la forma de tambien chequear el curso si existe sin tener que pasar el courseId por todos lados
-  // chequear la forma de tambien chequear el curso si existe sin tener que pasar el courseId por todos lados
   private async checkSection(sectionSlug: string, courseSlug?: string) {
     try {
       const where: any = { slug: sectionSlug };

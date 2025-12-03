@@ -100,6 +100,10 @@ export class CourseService {
           ...dto,
           slug,
         },
+        include: {
+          instructor: true,
+          category: true,
+        },
       });
 
       if (!newCourse)
@@ -118,6 +122,10 @@ export class CourseService {
       const updatedCourse = await this.prisma.course.update({
         where: { id },
         data: { ...dto, slug },
+        include: {
+          instructor: true,
+          category: true,
+        },
       });
 
       if (!updatedCourse)
@@ -180,6 +188,10 @@ export class CourseService {
             connect: { id: userId },
           },
         },
+        include: {
+          instructor: true,
+          category: true,
+        },
       });
       return course;
     } catch (error) {
@@ -199,6 +211,10 @@ export class CourseService {
           students: {
             disconnect: { id: userId },
           },
+        },
+        include: {
+          instructor: true,
+          category: true,
         },
       });
       return course;

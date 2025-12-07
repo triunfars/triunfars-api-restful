@@ -170,6 +170,7 @@ describe('App e2e', () => {
                     audience: ['Audience 1'],
                     instructorId: '$S{adminId}',
                     price: '10.00',
+                    revenueCatProductId: 'course_test_101',
                 })
                 .expectStatus(201)
                 .stores('courseId', 'id');
@@ -300,6 +301,199 @@ describe('App e2e', () => {
                     isPremium: true,
                     subscriptionStatus: 'active',
                 });
+        });
+
+        it('should handle single course purchase webhook', () => {
+            return pactum
+                .spec()
+                .post('/payments/webhook')
+                .withHeaders({ Authorization: 'Bearer test_webhook_secret' })
+                .withBody({
+                    event: {
+                        type: 'NON_RENEWING_PURCHASE',
+                        app_user_id: '$S{userId}',
+                        product_id: 'course_test_101',
+                        purchased_at_ms: Date.now(),
+                    },
+                })
+                .expectStatus(200);
+        });
+
+        it('should verify user is enrolled in course via purchase', () => {
+            return pactum
+                .spec()
+                .get('/courses/user/enrolled')
+                .withHeaders({ Authorization: 'Bearer $S{userToken}' })
+                .expectStatus(200)
+                .expectJsonLike([
+                    {
+                        id: '$S{courseId}',
+                    },
+                ]);
+        });
+    });
+
+    describe('Security (RBAC)', () => {
+        it('should throw 403 when student tries to create course', () => {
+            return pactum
+                .spec()
+                .post('/courses')
+                .withHeaders({ Authorization: 'Bearer $S{studentToken}' })
+                .withBody({
+                    title: 'Hacked Course',
+                    description: 'Hacked Description',
+                    categoryId: '$S{categoryId}',
+                    instructorId: '$S{adminId}',
+                })
+                .expectStatus(403);
+        });
+
+        it('should throw 403 when student tries to update course', () => {
+            return pactum
+                .spec()
+                .patch('/courses/$S{courseId}')
+                .withHeaders({ Authorization: 'Bearer $S{studentToken}' })
+                .withBody({
+                    title: 'Hacked Title',
+                })
+                .expectStatus(403);
+        });
+
+        it('should throw 403 when student tries to delete course', () => {
+            return pactum
+                .spec()
+                .delete('/courses/$S{courseId}')
+                .withHeaders({ Authorization: 'Bearer $S{studentToken}' })
+                .expectStatus(403);
+        });
+
+        it('should throw 403 when student tries to create section', () => {
+            return pactum
+                .spec()
+                .post('/courses/test-course/sections')
+                .withHeaders({ Authorization: 'Bearer $S{studentToken}' })
+                .withBody({
+                    title: 'Hacked Section',
+                })
+                .expectStatus(403);
+        });
+
+        it('should throw 403 when student tries to update section', () => {
+            return pactum
+                .spec()
+                .patch('/courses/test-course/sections/test-section')
+                .withHeaders({ Authorization: 'Bearer $S{studentToken}' })
+                .withBody({
+                    title: 'Hacked Section Title',
+                })
+                .expectStatus(403);
+        });
+
+        it('should throw 403 when student tries to delete section', () => {
+            return pactum
+                .spec()
+                .delete('/courses/test-course/sections/test-section')
+                .withHeaders({ Authorization: 'Bearer $S{studentToken}' })
+                .expectStatus(403);
+        });
+
+        it('should throw 403 when student tries to create lesson', () => {
+            return pactum
+                .spec()
+                .post('/courses/test-course/sections/test-section/lessons')
+                .withHeaders({ Authorization: 'Bearer $S{studentToken}' })
+                .withBody({
+                    title: 'Hacked Lesson',
+                    content: 'Hacked Content',
+                })
+                .expectStatus(403);
+        });
+
+        it('should throw 403 when student tries to update lesson', () => {
+            return pactum
+                .spec()
+                .patch('/courses/test-course/sections/test-section/lessons/$S{lessonId}')
+                .withHeaders({ Authorization: 'Bearer $S{studentToken}' })
+                .withBody({
+                    title: 'Hacked Lesson Title',
+                })
+                .expectStatus(403);
+        });
+
+        it('should throw 403 when student tries to delete lesson', () => {
+            return pactum
+                .spec()
+                .delete('/courses/test-course/sections/test-section/lessons/$S{lessonId}')
+                .withHeaders({ Authorization: 'Bearer $S{studentToken}' })
+                .expectStatus(403);
+        });
+    });
+
+    describe('Access Control (Non-Enrolled User)', () => {
+        it('should create non-enrolled user', () => {
+            return pactum
+                .spec()
+                .post('/auth/signup')
+                .withBody({
+                    email: 'notenrolled@test.com',
+                    password: '123',
+                    firstName: 'Not',
+                    lastName: 'Enrolled',
+                    role: 'STUDENT',
+                })
+                .expectStatus(201);
+        });
+
+        it('should signin as non-enrolled user', () => {
+            return pactum
+                .spec()
+                .post('/auth/signin')
+                .withBody({
+                    email: 'notenrolled@test.com',
+                    password: '123',
+                })
+                .expectStatus(200)
+                .stores('nonEnrolledToken', 'token');
+        });
+
+        it('should ALLOW access to public course details (Sales Page)', () => {
+            return pactum
+                .spec()
+                .get('/courses/test-course')
+                .withHeaders({ Authorization: 'Bearer $S{nonEnrolledToken}' })
+                .expectStatus(200)
+                .expectJsonLike({
+                    slug: 'test-course',
+                });
+        });
+
+        it('should ALLOW access to list of all courses', () => {
+            return pactum
+                .spec()
+                .get('/courses')
+                .withHeaders({ Authorization: 'Bearer $S{nonEnrolledToken}' })
+                .expectStatus(200)
+                .expectJsonLike([
+                    {
+                        slug: 'test-course',
+                    },
+                ]);
+        });
+
+        it('should DENY access to course sections (Curriculum)', () => {
+            return pactum
+                .spec()
+                .get('/courses/test-course/sections')
+                .withHeaders({ Authorization: 'Bearer $S{nonEnrolledToken}' })
+                .expectStatus(403);
+        });
+
+        it('should DENY access to specific lesson', () => {
+            return pactum
+                .spec()
+                .get('/courses/test-course/sections/test-section/lessons/$S{lessonId}')
+                .withHeaders({ Authorization: 'Bearer $S{nonEnrolledToken}' })
+                .expectStatus(403);
         });
     });
 });

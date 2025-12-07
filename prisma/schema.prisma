@@ -29,8 +29,8 @@ model Lesson {
   type LessonType @default(VIDEO)
   content String
   url String?
-  slug String @unique
-  coverImage String?
+  slug                String         @unique
+  coverImage          String?
 
   sectionId String @db.ObjectId
   section Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
@@ -147,6 +147,8 @@ model Course {
   id     String @id @default(auto()) @map("_id") @db.ObjectId
   title  String @unique
   slug   String @unique
+  revenueCatProductId String? @unique
+  revenueCatIdentifierId String @unique
   description   String
   
 

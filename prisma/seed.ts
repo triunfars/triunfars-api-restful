@@ -65,6 +65,21 @@ async function main() {
     });
     console.log({ student });
 
+    const notEnrolledStudent = await prisma.user.upsert({
+        where: { email: 'notenrolled@example.com' },
+        update: {},
+        create: {
+            email: 'notenrolled@example.com',
+            password,
+            firstName: 'Not',
+            lastName: 'Enrolled',
+            role: Role.STUDENT,
+            isEmailConfirmed: true,
+            bio: 'I am not enrolled in any courses yet.',
+        },
+    });
+    console.log({ notEnrolledStudent });
+
     // 3. Create Category
     const category = await prisma.category.upsert({
         where: { slug: 'web-development' },
@@ -79,7 +94,9 @@ async function main() {
     // 4. Create Course
     const course = await prisma.course.upsert({
         where: { slug: 'intro-to-nestjs' },
-        update: {},
+        update: {
+            revenueCatIdentifierId: 'intro_to_nestjs',
+        },
         create: {
             title: 'Introduction to NestJS',
             slug: 'intro-to-nestjs',
@@ -90,6 +107,7 @@ async function main() {
             requirements: ['Basic JavaScript knowledge'],
             audience: ['Beginner developers'],
             price: 'Free',
+            revenueCatIdentifierId: 'intro_to_nestjs',
         },
     });
     console.log({ course });

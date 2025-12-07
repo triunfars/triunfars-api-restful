@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateLessonDto } from './dto';
 import slugify from 'slugify';
 import { S3Service } from 'src/s3/s3.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class LessonService {
@@ -21,7 +22,7 @@ export class LessonService {
 
       const section = await this.prisma.section.findUnique({
         where,
-        select: { id: true },
+        select: { id: true, courseId: true },
       });
 
       if (!section) throw new ForbiddenException('Section does not exist or does not belong to course');
@@ -52,9 +53,10 @@ export class LessonService {
     });
   }
 
-  async getById(sectionSlug: string, lessonId: string, courseSlug?: string) {
+  async getById(sectionSlug: string, lessonId: string, courseSlug: string) {
     try {
       const section = await this.checkSection(sectionSlug, courseSlug);
+
       const lesson = await this.prisma.lesson.findUnique({
         where: {
           sectionId: section.id,

@@ -17,7 +17,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { GetMe } from 'src/auth/decorators/get-me.decorator';
 import { User } from '@prisma/client';
 
-@UseGuards(JwtGuard)
+import { CourseAccessGuard, RolesGuard } from 'src/auth/guard';
+import { hasRoles } from 'src/auth/decorators/roles.decorators';
+import { Role } from '@prisma/client';
+
+@UseGuards(JwtGuard, CourseAccessGuard)
 @Controller()
 export class LessonController {
   constructor(private readonly lessonService: LessonService) { }
@@ -39,6 +43,8 @@ export class LessonController {
     return this.lessonService.getById(sectionSlug, lessonId, courseSlug);
   }
 
+  @UseGuards(RolesGuard)
+  @hasRoles(Role.ADMIN, Role.INSTRUCTOR)
   @Post()
   createLesson(
     @Body() dto: CreateLessonDto,
@@ -48,6 +54,8 @@ export class LessonController {
     return this.lessonService.createLesson(sectionSlug, dto, courseSlug);
   }
 
+  @UseGuards(RolesGuard)
+  @hasRoles(Role.ADMIN, Role.INSTRUCTOR)
   @Patch(':lessonId')
   updateLesson(
     @Body() dto: Partial<CreateLessonDto>,
@@ -58,6 +66,8 @@ export class LessonController {
     return this.lessonService.updateLesson(dto, lessonId, sectionSlug, courseSlug);
   }
 
+  @UseGuards(RolesGuard)
+  @hasRoles(Role.ADMIN, Role.INSTRUCTOR)
   @Patch(':lessonId/uploadimage')
   @UseInterceptors(FileInterceptor('file'))
   addSectionImage(
@@ -77,6 +87,8 @@ export class LessonController {
     return this.lessonService.markLessonAsCompleted(lessonId, user.id);
   }
 
+  @UseGuards(RolesGuard)
+  @hasRoles(Role.ADMIN, Role.INSTRUCTOR)
   @Delete(':lessonId')
   deleteLesson(
     @Param('lessonId') lessonId: string,

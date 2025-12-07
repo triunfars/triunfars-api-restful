@@ -42,15 +42,15 @@ export class CourseController {
     return this.courseService.createCourse(dto);
   }
 
-  // @UseGuards(RolesGuard)
-  // @hasRoles(Role.ADMIN, Role.INSTRUCTOR)
+  @UseGuards(RolesGuard)
+  @hasRoles(Role.ADMIN, Role.INSTRUCTOR)
   @Patch(':id')
   updateCourse(@Body() dto: UpdateCourseDto, @Param('id') id: string) {
     return this.courseService.updateCourse(dto, id);
   }
 
-  // @UseGuards(RolesGuard)
-  // @hasRoles(Role.ADMIN, Role.INSTRUCTOR)
+  @UseGuards(RolesGuard)
+  @hasRoles(Role.ADMIN, Role.INSTRUCTOR)
   @Patch(':courseSlug/uploadimage')
   @UseInterceptors(FileInterceptor('file'))
   addSectionImage(
@@ -60,6 +60,8 @@ export class CourseController {
     return this.courseService.updateCourseImage(courseSlug, file);
   }
 
+  @UseGuards(RolesGuard)
+  @hasRoles(Role.ADMIN, Role.INSTRUCTOR)
   @Delete(':id')
   deleteCourse(@Param('id') id: string) {
     return this.courseService.deleteCourse(id);

@@ -15,10 +15,14 @@ import { SectionService } from './section.service';
 import { CreateSectionDto } from './dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-@UseGuards(JwtGuard)
+import { CourseAccessGuard, RolesGuard } from 'src/auth/guard';
+import { hasRoles } from 'src/auth/decorators/roles.decorators';
+import { Role } from '@prisma/client';
+
+@UseGuards(JwtGuard, CourseAccessGuard)
 @Controller()
 export class SectionController {
-  constructor(private readonly sectionService: SectionService) {}
+  constructor(private readonly sectionService: SectionService) { }
   @Get()
   getAll(@Param('courseSlug') courseSlug: string) {
     return this.sectionService.getAll(courseSlug);
@@ -32,6 +36,8 @@ export class SectionController {
     return this.sectionService.getBySlug(courseSlug, sectionSlug);
   }
 
+  @UseGuards(RolesGuard)
+  @hasRoles(Role.ADMIN, Role.INSTRUCTOR)
   @Patch(':sectionSlug/uploadimage')
   @UseInterceptors(FileInterceptor('file'))
   addSectionImage(
@@ -42,6 +48,8 @@ export class SectionController {
     return this.sectionService.addSectionImage(sectionSlug, courseSlug, file);
   }
 
+  @UseGuards(RolesGuard)
+  @hasRoles(Role.ADMIN, Role.INSTRUCTOR)
   @Post()
   createSection(
     @Body() dto: CreateSectionDto,
@@ -50,6 +58,8 @@ export class SectionController {
     return this.sectionService.createSection(courseSlug, dto);
   }
 
+  @UseGuards(RolesGuard)
+  @hasRoles(Role.ADMIN, Role.INSTRUCTOR)
   @Patch(':sectionSlug')
   updateSection(
     @Body() dto: CreateSectionDto,
@@ -59,6 +69,8 @@ export class SectionController {
     return this.sectionService.updateSection(courseSlug, sectionSlug, dto);
   }
 
+  @UseGuards(RolesGuard)
+  @hasRoles(Role.ADMIN, Role.INSTRUCTOR)
   @Delete(':sectionSlug')
   deleteSection(
     @Param('sectionSlug') sectionSlug: string,

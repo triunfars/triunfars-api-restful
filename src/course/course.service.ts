@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCourseDto, UpdateCourseDto } from './dto';
 import slugify from 'slugify';
@@ -6,6 +6,9 @@ import { S3Service } from 'src/s3/s3.service';
 
 @Injectable()
 export class CourseService {
+
+  private readonly logger = new Logger(CourseService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly s3Service: S3Service,
@@ -95,10 +98,16 @@ export class CourseService {
 
       // Create course
       const slug = slugify(dto.title, { lower: true });
+      const revenueCatIdentifierId = slugify(dto.revenueCatIdentifierId, {
+        replacement: '_',
+        lower: true,
+      });
+
       const newCourse = await this.prisma.course.create({
         data: {
           ...dto,
           slug,
+          revenueCatIdentifierId,
         },
         include: {
           instructor: true,
@@ -119,9 +128,18 @@ export class CourseService {
   async updateCourse(dto: UpdateCourseDto, id: string) {
     try {
       const slug = slugify(dto.title, { lower: true });
+      let revenueCatIdentifierId = undefined;
+
+      if (dto.revenueCatIdentifierId) {
+        revenueCatIdentifierId = slugify(dto.revenueCatIdentifierId, {
+          replacement: '_',
+          lower: true,
+        });
+      }
+
       const updatedCourse = await this.prisma.course.update({
         where: { id },
-        data: { ...dto, slug },
+        data: { ...dto, slug, revenueCatIdentifierId },
         include: {
           instructor: true,
           category: true,
@@ -193,9 +211,10 @@ export class CourseService {
           category: true,
         },
       });
+      this.logger.log(`User ${userId} enrolled in course ${courseId}`);
       return course;
     } catch (error) {
-      console.log('ENROLL_USER ==>>', error);
+      console.log("Error ==>>", error)
       if (error.code === 'P2025') {
         throw new ForbiddenException('Course not found');
       }

@@ -12,7 +12,7 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     environment:
-      - DATABASE_URL=mongodb://mongo:27017/triunfars
+      - DATABASE_URL=${DATABASE_URL}
       - PORT=8001
       - JWT_SECRET=${JWT_SECRET}
       - S3_BUCKET=${S3_BUCKET}

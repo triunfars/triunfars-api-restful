@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CourseService } from '../course/course.service';
+import { EventsGateway } from '../events/events.gateway';
 
 @Injectable()
 export class PaymentService {
@@ -9,6 +10,7 @@ export class PaymentService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly courseService: CourseService,
+        private readonly eventsGateway: EventsGateway,
     ) { }
 
     async handleWebhook(body: any) {
@@ -116,6 +118,7 @@ export class PaymentService {
             console.log("courseId", course.id)
 
             await this.courseService.enrollUser(course.id, app_user_id);
+            this.eventsGateway.notifyEnrollment(app_user_id, course.id);
             this.logger.log(`Successfully enrolled user ${app_user_id} in course ${course.title}`);
         } catch (error) {
             this.logger.error(`Failed to handle single purchase for user ${app_user_id}`, error);

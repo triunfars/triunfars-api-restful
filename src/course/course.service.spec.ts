@@ -98,4 +98,29 @@ describe('CourseService', () => {
             );
         });
     });
+    describe('updateCourseImage', () => {
+        it('should upload image with correct key structure', async () => {
+            const courseSlug = 'test-course';
+            const file = {
+                originalname: 'image.png',
+                fieldname: 'file',
+                buffer: Buffer.from('test'),
+            } as Express.Multer.File;
+            const mockUrl = 'https://s3.amazonaws.com/test-url';
+
+            (mockS3Service.uploadFile as jest.Mock).mockResolvedValue(mockUrl);
+            (prisma.course.update as jest.Mock).mockResolvedValue({ slug: courseSlug, coverImage: mockUrl });
+
+            await service.updateCourseImage(courseSlug, file);
+
+            expect(mockS3Service.uploadFile).toHaveBeenCalledWith(
+                file,
+                expect.stringMatching(new RegExp(`^${courseSlug}/coverImage/\\d+_file.png$`))
+            );
+            expect(prisma.course.update).toHaveBeenCalledWith({
+                where: { slug: courseSlug },
+                data: { coverImage: mockUrl },
+            });
+        });
+    });
 });

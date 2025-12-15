@@ -11,7 +11,7 @@ export class CreateLessonDto {
   @IsString()
   @IsOptional()
   @IsUrl()
-  url: string;
+  source: string;
 
   @IsOptional()
   type: LessonType;

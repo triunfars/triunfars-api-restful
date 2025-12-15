@@ -33,7 +33,7 @@ export class CourseService {
                   type: true,
                   description: true,
                   content: true,
-                  url: true,
+                  source: true,
                   coverImage: true,
                   slug: true,
                 },
@@ -68,7 +68,7 @@ export class CourseService {
                   type: true,
                   description: true,
                   content: true,
-                  url: true,
+                  source: true,
                   coverImage: true,
                   slug: true,
                 },
@@ -159,7 +159,8 @@ export class CourseService {
   async updateCourseImage(courseSlug: string, file: Express.Multer.File) {
     try {
       // Constructing key and saving image in AWS
-      const key = `${file.fieldname}${Date.now()}`;
+      const fileExtension = file.originalname.split('.').pop();
+      const key = `${courseSlug}/coverImage/${Date.now()}_${file.fieldname}.${fileExtension}`;
       const imageUrl = await this.s3Service.uploadFile(file, key);
 
       const courseUpdated = await this.prisma.course.update({
@@ -238,7 +239,6 @@ export class CourseService {
       });
       return course;
     } catch (error) {
-      console.log('UNENROLL_USER ==>>', error);
       if (error.code === 'P2025') {
         throw new ForbiddenException('Course not found');
       }
@@ -270,7 +270,7 @@ export class CourseService {
                   type: true,
                   description: true,
                   content: true,
-                  url: true,
+                  source: true,
                   coverImage: true,
                   slug: true,
                 },

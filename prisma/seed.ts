@@ -149,7 +149,7 @@ async function main() {
             description: 'An introduction to the NestJS framework and its core concepts.',
             content: 'NestJS is a progressive Node.js framework for building efficient, reliable and scalable server-side applications.',
             type: LessonType.VIDEO,
-            url: videoUrl,
+            source: videoUrl,
             sectionId: section1.id,
         },
     });
@@ -161,7 +161,7 @@ async function main() {
             description: 'Learn how to set up your development environment for NestJS.',
             content: 'In this lesson, we will install Node.js, npm, and create our first NestJS project.',
             type: LessonType.VIDEO,
-            url: videoUrl,
+            source: videoUrl,
             sectionId: section1.id,
         },
     });
@@ -185,7 +185,7 @@ async function main() {
             description: 'Understanding controllers and how routing works in NestJS.',
             content: 'Controllers are responsible for handling incoming requests and returning responses to the client.',
             type: LessonType.VIDEO,
-            url: videoUrl,
+            source: videoUrl,
             sectionId: section2.id,
         },
     });
@@ -197,7 +197,7 @@ async function main() {
             description: 'Learn about services and the powerful dependency injection system.',
             content: 'Services contain business logic and can be injected into controllers and other services.',
             type: LessonType.VIDEO,
-            url: videoUrl,
+            source: videoUrl,
             sectionId: section2.id,
         },
     });
@@ -221,7 +221,7 @@ async function main() {
             description: 'Build your first REST API endpoints with NestJS.',
             content: 'Learn how to create GET, POST, PUT, and DELETE endpoints for your API.',
             type: LessonType.VIDEO,
-            url: videoUrl,
+            source: videoUrl,
             sectionId: section3.id,
         },
     });
@@ -233,7 +233,7 @@ async function main() {
             description: 'Implement data validation using DTOs and class-validator.',
             content: 'DTOs (Data Transfer Objects) help us validate and transform incoming data.',
             type: LessonType.VIDEO,
-            url: videoUrl,
+            source: videoUrl,
             sectionId: section3.id,
         },
     });

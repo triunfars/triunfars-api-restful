@@ -28,7 +28,7 @@ model Lesson {
   description String
   type LessonType @default(VIDEO)
   content String
-  url String?
+  source String?
   slug                String         @unique
   coverImage          String?
 

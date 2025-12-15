@@ -79,6 +79,19 @@ export class LessonController {
     return this.lessonService.addLessonImage(file, lessonId, sectionSlug, courseSlug);
   }
 
+  @UseGuards(RolesGuard)
+  @hasRoles(Role.ADMIN, Role.INSTRUCTOR)
+  @Patch(':lessonId/uploadvideo')
+  @UseInterceptors(FileInterceptor('file'))
+  addLessonVideo(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('sectionSlug') sectionSlug: string,
+    @Param('lessonId') lessonId: string,
+    @Param('courseSlug') courseSlug: string,
+  ) {
+    return this.lessonService.addLessonVideo(file, lessonId, sectionSlug, courseSlug);
+  }
+
   @Patch(':lessonId/complete')
   markAsCompleted(
     @Param('lessonId') lessonId: string,

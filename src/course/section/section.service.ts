@@ -90,7 +90,8 @@ export class SectionService {
       const course = await this.checkCourse(courseSlug);
 
       // Constructing key and saving image in AWS
-      const key = `${file.fieldname}${Date.now()}`;
+      const fileExtension = file.originalname.split('.').pop();
+      const key = `${courseSlug}/sections/${sectionSlug}/coverImage/${Date.now()}_${file.fieldname}.${fileExtension}`;
       const imageUrl = await this.s3Service.uploadFile(file, key);
 
       const updatedSection = await this.prisma.section.update({

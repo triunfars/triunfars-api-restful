@@ -198,7 +198,7 @@ describe('App e2e', () => {
                     content: 'Test Content',
                     description: 'Test Description',
                     type: 'VIDEO',
-                    url: 'http://video.url',
+                    source: 'http://video.url',
                 })
                 .expectStatus(201)
                 .stores('lessonId', 'id');

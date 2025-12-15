@@ -126,8 +126,15 @@ export class LessonService {
     try {
       const section = await this.checkSection(sectionSlug, courseSlug);
 
+      const lesson = await this.prisma.lesson.findUnique({
+        where: { id: lessonId },
+        select: { slug: true },
+      });
+      if (!lesson) throw new ForbiddenException('Lesson not found');
+
       // Constructing key and saving image in AWS
-      const key = `${file.fieldname}${Date.now()}`;
+      const fileExtension = file.originalname.split('.').pop();
+      const key = `${courseSlug}/sections/${sectionSlug}/lessons/${lesson.slug}/coverImage/${Date.now()}_${file.fieldname}.${fileExtension}`;
       const imageUrl = await this.s3Service.uploadFile(file, key);
       return await this.prisma.lesson.update({
         where: {
@@ -138,6 +145,49 @@ export class LessonService {
       });
     } catch (error) {
       console.log('ADD_LESSON_IMAGE_ERROR ==>>', error);
+      throw new ForbiddenException('Server internal error');
+    }
+  }
+
+  async addLessonVideo(
+    file: Express.Multer.File,
+    lessonId: string,
+    sectionSlug: string,
+    courseSlug?: string,
+  ) {
+    try {
+      const section = await this.checkSection(sectionSlug, courseSlug);
+
+      const lesson = await this.prisma.lesson.findUnique({
+        where: { id: lessonId },
+        select: { slug: true, source: true },
+      });
+      if (!lesson) throw new ForbiddenException('Lesson not found');
+
+      if (lesson.source) {
+        // Source URL format: https://${bucket}.s3.${this.region}.amazonaws.com/${key}
+        // We need to extract the key.
+        const urlParts = lesson.source.split('.amazonaws.com/');
+        if (urlParts.length > 1) {
+          const oldKey = urlParts[1];
+          await this.s3Service.deleteFile(oldKey);
+        }
+      }
+
+      // Constructing key and saving video in AWS
+      const fileExtension = file.originalname.split('.').pop();
+      const key = `${courseSlug}/sections/${sectionSlug}/lessons/${lesson.slug}/video/${Date.now()}_${file.fieldname}.${fileExtension}`;
+      const videoUrl = await this.s3Service.uploadFile(file, key);
+
+      return await this.prisma.lesson.update({
+        where: {
+          id: lessonId,
+          sectionId: section.id,
+        },
+        data: { source: videoUrl },
+      });
+    } catch (error) {
+      console.log('ADD_LESSON_VIDEO_ERROR ==>>', error);
       throw new ForbiddenException('Server internal error');
     }
   }

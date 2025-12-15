@@ -7,13 +7,13 @@ services:
       target: development
     command: npm run start:dev
     ports:
-      - "3000:3000"
+      - "8001:8001"
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     environment:
       - DATABASE_URL=mongodb://mongo:27017/triunfars
-      - PORT=3000
+      - PORT=8001
       - JWT_SECRET=${JWT_SECRET}
       - S3_BUCKET=${S3_BUCKET}
       - S3_REGION=${S3_REGION}
@@ -42,7 +42,7 @@ services:
     image: mongo-express
     restart: always
     ports:
-      - "8081:8081"
+      - "8000:8081"
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongo
       - ME_CONFIG_MONGODB_PORT=27017

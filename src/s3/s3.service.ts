@@ -4,6 +4,7 @@ import {
   PutObjectCommand,
   PutObjectCommandInput,
   PutObjectCommandOutput,
+  DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 
@@ -31,7 +32,6 @@ export class S3Service {
       Bucket: bucket,
       Key: key,
       ContentType: file.mimetype,
-      ACL: 'public-read',
     };
 
     try {
@@ -41,9 +41,25 @@ export class S3Service {
       if (response.$metadata.httpStatusCode === 200) {
         return `https://${bucket}.s3.${this.region}.amazonaws.com/${key}`;
       }
-      throw new Error('Image not save');
+      throw new Error('File couldnt be uploaded');
     } catch (error) {
       console.log('AWS_UPLOAD_FILE_ERROR', error);
+      throw error;
+    }
+  }
+
+  async deleteFile(key: string) {
+    const bucket = this.configService.get<string>('S3_BUCKET');
+    const input = {
+      Bucket: bucket,
+      Key: key,
+    };
+
+    try {
+      await this.s3.send(new DeleteObjectCommand(input));
+      return true;
+    } catch (error) {
+      console.log('AWS_DELETE_FILE_ERROR', error);
       throw error;
     }
   }

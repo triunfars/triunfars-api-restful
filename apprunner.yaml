@@ -7,7 +7,7 @@ build:
       - npx prisma generate
       - npm run build
 run:
-  command: sh -c "npx prisma db push && npm run start:prod"
+  command: npm run start:migrate:prod
   network:
     port: 8001
   env:

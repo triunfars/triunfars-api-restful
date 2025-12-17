@@ -6,13 +6,12 @@ import { S3Service } from 'src/s3/s3.service';
 
 @Injectable()
 export class CourseService {
-
   private readonly logger = new Logger(CourseService.name);
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly s3Service: S3Service,
-  ) { }
+  ) {}
 
   async getAll() {
     try {
@@ -98,16 +97,16 @@ export class CourseService {
 
       // Create course
       const slug = slugify(dto.title, { lower: true });
-      const revenueCatIdentifierId = slugify(dto.revenueCatIdentifierId, {
-        replacement: '_',
-        lower: true,
-      });
+      // const revenueCatIdentifierId = slugify(dto.revenueCatIdentifierId, {
+      //   replacement: '_',
+      //   lower: true,
+      // });
 
       const newCourse = await this.prisma.course.create({
         data: {
           ...dto,
           slug,
-          revenueCatIdentifierId,
+          // revenueCatIdentifierId,
         },
         include: {
           instructor: true,
@@ -128,18 +127,18 @@ export class CourseService {
   async updateCourse(dto: UpdateCourseDto, id: string) {
     try {
       const slug = slugify(dto.title, { lower: true });
-      let revenueCatIdentifierId = undefined;
+      // let revenueCatIdentifierId = undefined;
 
-      if (dto.revenueCatIdentifierId) {
-        revenueCatIdentifierId = slugify(dto.revenueCatIdentifierId, {
-          replacement: '_',
-          lower: true,
-        });
-      }
+      // if (dto.revenueCatIdentifierId) {
+      //   revenueCatIdentifierId = slugify(dto.revenueCatIdentifierId, {
+      //     replacement: '_',
+      //     lower: true,
+      //   });
+      // }
 
       const updatedCourse = await this.prisma.course.update({
         where: { id },
-        data: { ...dto, slug, revenueCatIdentifierId },
+        data: { ...dto, slug },
         include: {
           instructor: true,
           category: true,
@@ -194,54 +193,6 @@ export class CourseService {
       };
     } catch (error) {
       console.log('UPDATE_COURSE ==>>', error);
-      throw new ForbiddenException('Server Internal Error');
-    }
-  }
-
-  async enrollUser(courseId: string, userId: string) {
-    try {
-      const course = await this.prisma.course.update({
-        where: { id: courseId },
-        data: {
-          students: {
-            connect: { id: userId },
-          },
-        },
-        include: {
-          instructor: true,
-          category: true,
-        },
-      });
-      this.logger.log(`User ${userId} enrolled in course ${courseId}`);
-      return course;
-    } catch (error) {
-      console.log("Error ==>>", error)
-      if (error.code === 'P2025') {
-        throw new ForbiddenException('Course not found');
-      }
-      throw new ForbiddenException('Server Internal Error');
-    }
-  }
-
-  async unenrollUser(courseId: string, userId: string) {
-    try {
-      const course = await this.prisma.course.update({
-        where: { id: courseId },
-        data: {
-          students: {
-            disconnect: { id: userId },
-          },
-        },
-        include: {
-          instructor: true,
-          category: true,
-        },
-      });
-      return course;
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new ForbiddenException('Course not found');
-      }
       throw new ForbiddenException('Server Internal Error');
     }
   }

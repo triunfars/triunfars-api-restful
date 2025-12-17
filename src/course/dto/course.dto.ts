@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class CreateCourseDto {
   @IsString()
@@ -16,12 +16,12 @@ export class CreateCourseDto {
   @IsString()
   price: string;
 
-  @IsString()
-  @IsOptional()
-  revenueCatProductId?: string;
+  // @IsString()
+  // @IsOptional()
+  // revenueCatProductId?: string;
 
-  @IsString()
-  revenueCatIdentifierId: string;
+  // @IsString()
+  // revenueCatIdentifierId: string;
 }
 
 export interface UpdateCourseDto {
@@ -30,6 +30,6 @@ export interface UpdateCourseDto {
   instructorId: string;
   categoryId: string;
   price: string;
-  revenueCatProductId?: string;
-  revenueCatIdentifierId?: string;
+  // revenueCatProductId?: string;
+  // revenueCatIdentifierId?: string;
 }

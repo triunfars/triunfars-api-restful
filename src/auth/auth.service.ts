@@ -12,7 +12,7 @@ export class AuthService {
     private prisma: PrismaService,
     private config: ConfigService,
     private jwt: JwtService,
-  ) { }
+  ) {}
 
   async signup(dto: SignUpDto) {
     try {
@@ -28,6 +28,13 @@ export class AuthService {
 
       if (!newUser)
         throw new ForbiddenException('Error while creating the user');
+
+      // Check if activated (default is false, so this blocks auto-login on signup)
+      if (!newUser.isActivated) {
+        throw new ForbiddenException(
+          'Account created but not activated. Please contact admin.',
+        );
+      }
 
       return this.registerToken(newUser.id, newUser.email);
     } catch (error) {
@@ -47,8 +54,14 @@ export class AuthService {
           email: dto.email,
         },
       });
-
+      console.log('user ==>>', user);
       if (!user) throw new ForbiddenException('Credentials incorrect');
+
+      if (!user.isActivated) {
+        throw new ForbiddenException(
+          'Account not activated. Please contact admin.',
+        );
+      }
 
       const pwMatches = await argon.verify(user.password, dto.password);
 
@@ -64,7 +77,7 @@ export class AuthService {
   async registerToken(
     userId: string,
     email: string,
-  ): Promise<{ token: string, userId: string }> {
+  ): Promise<{ token: string; userId: string }> {
     const payload = {
       sub: userId,
       email,

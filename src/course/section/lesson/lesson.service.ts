@@ -3,14 +3,13 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateLessonDto } from './dto';
 import slugify from 'slugify';
 import { S3Service } from 'src/s3/s3.service';
-import { User } from '@prisma/client';
 
 @Injectable()
 export class LessonService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly s3Service: S3Service,
-  ) { }
+  ) {}
 
   private async checkSection(sectionSlug: string, courseSlug?: string) {
     try {
@@ -25,7 +24,10 @@ export class LessonService {
         select: { id: true, courseId: true },
       });
 
-      if (!section) throw new ForbiddenException('Section does not exist or does not belong to course');
+      if (!section)
+        throw new ForbiddenException(
+          'Section does not exist or does not belong to course',
+        );
       return section;
     } catch (error) {
       console.log('CHECK_SECTION_ERROR ==>>', error);
@@ -85,7 +87,11 @@ export class LessonService {
     }
   }
 
-  async createLesson(sectionSlug: string, dto: CreateLessonDto, courseSlug?: string) {
+  async createLesson(
+    sectionSlug: string,
+    dto: CreateLessonDto,
+    courseSlug?: string,
+  ) {
     try {
       const section = await this.checkSection(sectionSlug, courseSlug);
       const slug = slugify(dto.title);
@@ -218,7 +224,11 @@ export class LessonService {
     }
   }
 
-  async deleteLesson(lessonId: string, sectionSlug: string, courseSlug?: string) {
+  async deleteLesson(
+    lessonId: string,
+    sectionSlug: string,
+    courseSlug?: string,
+  ) {
     try {
       const section = await this.checkSection(sectionSlug, courseSlug);
 

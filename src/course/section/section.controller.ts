@@ -22,7 +22,7 @@ import { Role } from '@prisma/client';
 @UseGuards(JwtGuard, CourseAccessGuard)
 @Controller()
 export class SectionController {
-  constructor(private readonly sectionService: SectionService) { }
+  constructor(private readonly sectionService: SectionService) {}
   @Get()
   getAll(@Param('courseSlug') courseSlug: string) {
     return this.sectionService.getAll(courseSlug);

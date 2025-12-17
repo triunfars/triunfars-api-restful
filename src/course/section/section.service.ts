@@ -9,7 +9,7 @@ export class SectionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly s3Service: S3Service,
-  ) { }
+  ) {}
 
   private async checkCourse(slug: string) {
     try {

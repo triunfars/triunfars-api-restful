@@ -33,10 +33,12 @@ import { EventsModule } from './events/events.module';
         },
       },
     }),
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 100,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100,
+      },
+    ]),
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -78,4 +80,4 @@ import { EventsModule } from './events/events.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

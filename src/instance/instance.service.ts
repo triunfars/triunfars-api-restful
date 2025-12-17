@@ -9,7 +9,7 @@ export class InstancesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly s3Service: S3Service,
-  ) { }
+  ) {}
 
   getInstances() {
     try {
@@ -33,7 +33,6 @@ export class InstancesService {
       console.log('GET_INSTANCES ==>>', error);
       throw error;
     }
-
   }
 
   async getInstanceBySlug(slug: string) {

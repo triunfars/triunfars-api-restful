@@ -6,9 +6,9 @@ import { HttpModule } from '@nestjs/axios';
 import { CourseModule } from '../course/course.module';
 
 @Module({
-    imports: [HttpModule, CourseModule],
-    controllers: [PaymentController],
-    providers: [PaymentService],
-    exports: [PaymentService],
+  imports: [HttpModule, CourseModule],
+  controllers: [PaymentController],
+  providers: [PaymentService],
+  exports: [PaymentService],
 })
-export class PaymentModule { }
+export class PaymentModule {}

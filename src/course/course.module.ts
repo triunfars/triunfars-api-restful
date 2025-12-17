@@ -8,4 +8,4 @@ import { RolesGuard } from 'src/auth/guard/roles.guard';
   controllers: [CourseController],
   exports: [CourseService],
 })
-export class CourseModule { }
+export class CourseModule {}

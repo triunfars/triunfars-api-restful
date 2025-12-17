@@ -1,14 +1,34 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateUserDto } from './dto';
 import { User } from '@prisma/client';
+import { CourseService } from 'src/course/course.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) { }
+  private readonly logger = new Logger(UsersService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly courseService: CourseService,
+  ) {}
 
   async getAllUsers() {
-    return this.prisma.user.findMany();
+    try {
+      return this.prisma.user.findMany({
+        include: {
+          enrolledCourses: true,
+        },
+      });
+    } catch (error) {
+      console.log('GET_ALL_USERS ==>>', error);
+      throw new ForbiddenException('Internal error');
+    }
   }
 
   async getMyPrivileges(user: User) {
@@ -77,7 +97,10 @@ export class UsersService {
       });
       return userUpdated;
     } catch (error) {
-      if (error?.code === 'P2025' || error?.meta?.cause?.includes('Record to update not found')) {
+      if (
+        error?.code === 'P2025' ||
+        error?.meta?.cause?.includes('Record to update not found')
+      ) {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
       throw error;
@@ -91,10 +114,75 @@ export class UsersService {
       });
       return user;
     } catch (error) {
-      if (error?.code === 'P2025' || error?.meta?.cause?.includes('Record to delete does not exist')) {
+      if (
+        error?.code === 'P2025' ||
+        error?.meta?.cause?.includes('Record to delete does not exist')
+      ) {
         throw new NotFoundException(`User with ID ${userId} not found`);
       }
       throw error;
+    }
+  }
+
+  async activateUser(userId: string, isActivated: boolean) {
+    try {
+      return await this.prisma.user.update({
+        where: { id: userId },
+        data: { isActivated },
+      });
+    } catch (error) {
+      if (error?.code === 'P2025') {
+        throw new NotFoundException(`User with ID ${userId} not found`);
+      }
+      throw error;
+    }
+  }
+
+  async enrollUser(courseId: string, userId: string) {
+    try {
+      const course = await this.prisma.course.update({
+        where: { id: courseId },
+        data: {
+          students: {
+            connect: { id: userId },
+          },
+        },
+        include: {
+          instructor: true,
+          category: true,
+        },
+      });
+      this.logger.log(`User ${userId} enrolled in course ${courseId}`);
+      return course;
+    } catch (error) {
+      console.log('Error ==>>', error);
+      if (error.code === 'P2025') {
+        throw new ForbiddenException('Course not found');
+      }
+      throw new ForbiddenException('Server Internal Error');
+    }
+  }
+
+  async unenrollUser(courseId: string, userId: string) {
+    try {
+      const course = await this.prisma.course.update({
+        where: { id: courseId },
+        data: {
+          students: {
+            disconnect: { id: userId },
+          },
+        },
+        include: {
+          instructor: true,
+          category: true,
+        },
+      });
+      return course;
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new ForbiddenException('Course not found');
+      }
+      throw new ForbiddenException('Server Internal Error');
     }
   }
 }

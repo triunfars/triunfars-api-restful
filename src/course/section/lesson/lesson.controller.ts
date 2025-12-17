@@ -24,7 +24,7 @@ import { Role } from '@prisma/client';
 @UseGuards(JwtGuard, CourseAccessGuard)
 @Controller()
 export class LessonController {
-  constructor(private readonly lessonService: LessonService) { }
+  constructor(private readonly lessonService: LessonService) {}
 
   @Get()
   getAll(
@@ -63,7 +63,12 @@ export class LessonController {
     @Param('sectionSlug') sectionSlug: string,
     @Param('courseSlug') courseSlug: string,
   ) {
-    return this.lessonService.updateLesson(dto, lessonId, sectionSlug, courseSlug);
+    return this.lessonService.updateLesson(
+      dto,
+      lessonId,
+      sectionSlug,
+      courseSlug,
+    );
   }
 
   @UseGuards(RolesGuard)
@@ -76,7 +81,12 @@ export class LessonController {
     @Param('lessonId') lessonId: string,
     @Param('courseSlug') courseSlug: string,
   ) {
-    return this.lessonService.addLessonImage(file, lessonId, sectionSlug, courseSlug);
+    return this.lessonService.addLessonImage(
+      file,
+      lessonId,
+      sectionSlug,
+      courseSlug,
+    );
   }
 
   @UseGuards(RolesGuard)
@@ -89,14 +99,16 @@ export class LessonController {
     @Param('lessonId') lessonId: string,
     @Param('courseSlug') courseSlug: string,
   ) {
-    return this.lessonService.addLessonVideo(file, lessonId, sectionSlug, courseSlug);
+    return this.lessonService.addLessonVideo(
+      file,
+      lessonId,
+      sectionSlug,
+      courseSlug,
+    );
   }
 
   @Patch(':lessonId/complete')
-  markAsCompleted(
-    @Param('lessonId') lessonId: string,
-    @GetMe() user: User,
-  ) {
+  markAsCompleted(@Param('lessonId') lessonId: string, @GetMe() user: User) {
     return this.lessonService.markLessonAsCompleted(lessonId, user.id);
   }
 

@@ -5,11 +5,8 @@ import { ConfigModule } from '@nestjs/config';
 
 @Global()
 @Module({
-    imports: [
-        JwtModule.register({}),
-        ConfigModule,
-    ],
-    providers: [EventsGateway],
-    exports: [EventsGateway],
+  imports: [JwtModule.register({}), ConfigModule],
+  providers: [EventsGateway],
+  exports: [EventsGateway],
 })
-export class EventsModule { }
+export class EventsModule {}

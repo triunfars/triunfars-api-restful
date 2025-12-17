@@ -133,6 +133,7 @@ model User {
   // resetPasswordToken String
   // resetPasswordExpire DateTime
   isEmailConfirmed Boolean @default(false)
+  isActivated Boolean @default(false)
   disabled Boolean @default(false)
 
   isPremium Boolean @default(false)
@@ -147,8 +148,8 @@ model Course {
   id     String @id @default(auto()) @map("_id") @db.ObjectId
   title  String @unique
   slug   String @unique
-  revenueCatProductId String? @unique
-  revenueCatIdentifierId String @unique
+  // revenueCatProductId String? @unique
+  // revenueCatIdentifierId String @unique
   description   String
   
 
